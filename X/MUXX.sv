@@ -1,12 +1,12 @@
 module X (
-  input [3:0] RDDorMMADDR, //RD data ir memory address
-  input [3:0] DM, //Data from memory
+  input [31:0] RDDorMMADDR, //RD data or memory address
+  input [31:0] DM, //Data from memory
   input s, //select bit
-  output [3:0] RD_data
+  output [31:0] RD_data
 );
   
-  logic [3:0] rddata;
-	
+  logic [31:0] rddata;
+  
   always @(*) begin
     case(s)
       0: rddata = RDDorMMADDR;
@@ -17,6 +17,5 @@ module X (
       
       
   assign RD_data = rddata;
-  	
+    
 endmodule
-
