@@ -1,4 +1,4 @@
-module X (
+module X ( //name, and also bitwidths?
   input [3:0] RDDorMMADDR, //RD data ir memory address
   input [3:0] DM, //Data from memory
   input s, //select bit
