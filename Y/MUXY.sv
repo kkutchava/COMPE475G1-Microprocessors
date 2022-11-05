@@ -1,4 +1,4 @@
-module Y (
+module Y ( //better names for modules maybe?
   input [3:0] ARd, //Destination Register
   input [3:0] FJ15, //15, for jump
   input s, //select bit
