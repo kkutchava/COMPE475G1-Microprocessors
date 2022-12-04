@@ -53,25 +53,22 @@ module src2shift(
 					if (count < Imm24[11:8]) answ = {answ[0], answ[31:1]};
 				end
 			end
-			shamt5LSL: begin //Note.: could be done 32 - imm24[11:7] and set C => answ[32 - imm24[11:7]]
-				if (Imm24[11:7] != 0) begin //////!!!!!!!SHIFTS BY 6 BITS!!!!!!//////
-					answ = Rm << (Imm24[11:7] - 2); //32th bit will be the last bit shift out
-					C = answ[31]; //assign last bit shift out
-					answ = answ << 1; //shift out the last bit
+			shamt5LSL: begin //Note.: 32 - imm24[11:7] and set C => answ[32 - imm24[11:7]]
+				if (Imm24[11:7] != 0) begin
+					C = Rm[32 - Imm24[11:7]];
+					answ = Rm << (Imm24[11:7]); 
 				end
 			end
 			shamt5LSR: begin
 				if (Imm24[11:7] != 0) begin
-					answ = Rm >> (Imm24[11:7] - 1);
-					C = answ[0]; //same as above 
-					answ = answ >> 1;
+					C = Rm[Imm24[11:7] - 1];
+					answ = Rm >> (Imm24[11:7]);
 				end
 			end
 			shamt5ASR: begin
 				if (Imm24[11:7] != 0) begin
-					answ = Rm >>> (Imm24[11:7] - 1);
-					C = answ[0]; //same, see above
-					answ = answ >>> 1;
+					C = Rm[Imm24[11:7] - 1];
+					answ = Rm >>> (Imm24[11:7]);
 				end
 			end
 			shamt5ROR: begin //rotate
@@ -82,23 +79,20 @@ module src2shift(
 			end
 			RsLSL: begin
 				if (Rs != 0) begin
-					answ = Rm << (Rs - 1);
-					C = answ[31]; //again same
-					answ = answ << 1;
+					C = Rm[32 - Rs];
+					answ = Rm << (Rs);
 				end
 			end
 			RsLSR: begin
 				if (Rs != 0) begin
-					answ = Rm >> (Rs - 1);
-					C = answ[0]; //nothing new trust me 
-					answ = answ >> 1;
+					C = Rm[Rs - 1];
+					answ = Rm >> (Rs);
 				end
 			end
 			RsASR: begin
 				if (Rs != 0) begin
-					answ = Rm >>> (Rs - 1);
-					C = answ[0]; //saaamee, lol
-					answ = answ >>> 1;
+					C = Rm[Rs - 1];
+					answ = Rm >>> (Rs);
 				end
 			end
 			RsROR: begin //rotate
