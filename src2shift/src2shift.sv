@@ -30,7 +30,7 @@ module src2shift(
 	//then shifting it out, so yeah dat's it.
 	
 	typedef enum logic [3:0]{rotImm8, shamt5LSL, shamt5LSR, shamt5ASR, 
-			shamt5ROR, RsLSL, RsLSR, RsASR, RsROR, Imm12, BranchImm24} state;
+			shamt5ROR, RsLSL, RsLSR, RsASR, RsROR, Imm12, BranchImm24, dirRm} state;
 	state myState;
 	//assign myState = opState;
 	logic [31:0] answ;
@@ -50,7 +50,7 @@ module src2shift(
 			rotImm8: begin //rotate
 				answ = {24'b000000000000000000000000, Imm24[7:0]};
 				for (count = 0; count < 32; count = count + 1) begin
-					if (count < Imm24[11:8]) answ = {answ[0], answ[31:1]};
+					if (count < Imm24[11:8]) answ = {answ[0], answ[31:1]}; //in case of MOV instr this won't exequte
 				end
 			end
 			shamt5LSL: begin //Note.: 32 - imm24[11:7] and set C => answ[32 - imm24[11:7]]
@@ -102,10 +102,12 @@ module src2shift(
 				end
 			end
 			Imm12:
-				answ = {20'b00000000000000000000,Imm24[11:0]}; //must be 32 bits, so vawepep
+				answ = {20'b00000000000000000000,Imm24[11:0]}; //must be 32 bits, so vawepep //also when adding imm val directly
 			BranchImm24:
 				answ = {8'b00000000,Imm24<<2}; //same idea - must be 32 bits. 2 shift because it was in slides
-			
+			dirRm: begin
+				answ = Rm; //when adding two registers or something like that
+			end
 		endcase
 	end
 	

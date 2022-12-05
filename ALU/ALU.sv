@@ -11,7 +11,7 @@ module ALU(
 
 
 
-	typedef enum logic [3:0] {PLUS, cPLUS, MINUS, revMINUS, cMINUS, revcMINUS, MULT, AND, XOR, OR, NOT, CLEAR, RRX} state;
+	typedef enum logic [3:0] {PLUS, cPLUS, MINUS, revMINUS, cMINUS, revcMINUS, MULT, AND, XOR, OR, NOT, CLEAR, RRX, MOVE} state;
 	state myState;
 	logic [31:0] answ;
 	logic [32:0] plusansw = 0;
@@ -68,12 +68,16 @@ module ALU(
 				answ = src1 & ~src2;
 			
 			RRX: begin 
-				answ = {answ[0], answ[31:1]}; //rotate by 1 bit
+				answ = {src2[0], src2[31:1]}; //rotate by 1 bit
 				temp = carr; //set temp to carry bit
 				C = answ[31]; //set carry bit to 32th bit value
 				answ[31] = temp; //set 32th bit to carry bit value
-			end
 				
+			end
+			
+			MOVE: begin
+				answ = src2; //directly assigning for shift operation and move operation
+			end
 		endcase
 	end
 	
