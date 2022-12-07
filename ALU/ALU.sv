@@ -18,7 +18,11 @@ module ALU(
 	logic [63:0] multansw = 0;
 	logic temp, C = 0;
 	
-	always @(controller) begin
+	initial begin
+		plusansw = 0;
+	end
+	
+	always @(*) begin
 		//for next instruction they should be 0
 		plusansw = 0;
 		multansw = 0;
@@ -26,7 +30,7 @@ module ALU(
 		case(controller)
 			
 			PLUS: begin
-				plusansw = src1 + src2; 
+				plusansw = {1'b0,src1} + {1'b0,src2}; 
 				answ = plusansw[31:0];
 			end
 			
@@ -80,6 +84,7 @@ module ALU(
 			end
 		endcase
 	end
+	
 	
 	
 		//negative in 2's complement

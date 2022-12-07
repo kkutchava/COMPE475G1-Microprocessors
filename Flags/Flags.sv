@@ -9,7 +9,7 @@ module Flags (
 		
 	
 	
-	logic [3:0] nzvc; //mt flags
+	logic [3:0] nzvc = 0; //mt flags
 	
 	always @(posedge CLOCK_50) begin
 		if (update_flags)

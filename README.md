@@ -1,0 +1,33 @@
+<h1>CompE475 Microprocessor</h1>
+
+<h2>ALU module</h2>
+ALU module has 5 inputs and 2 outputs. Its main purpose is to perform operations and set new flags. The two outputs are nzvc (negative, zero, overflow, and carry flags) and RdData_OR_memAddr aka ALU_OUT, where the result of the operation is stored. The inputs are two operands - src1 and src2, carry bit from Flags module, c bit from src2shift module, and controller input from Controller module. In the module itself I have 14 cases - PLUS, cPLUS, MINUS, revMINUS, cMINUS, revcMINUS, MULT, AND, XOR, OR, NOT, CLEAR, RRX, MOVE. They all perform corresponding operation with src1 and src2 (sometimes directly writing src2 to the answer). I also have here RRX, since it is easier to perform it here. After the always block I am assigning flags: n - Negative flags is assigned when the result answ is negative meaning answ[31] == 1, z - Zero flags is set if the result of the flag-setting instruction is zero, v - Overflow flags is set if the sum two pos nums lead to neg num or visa versa, note: it only happens when we have addition, subtraction, or multiplication (++their other variations), bitwise operation DO NOT set this flag (I checked). c - Carry flag is set if addition produces carry C is set to 0 if the subtraction produced a borrow, and to 1 otherwise, if multiplication is not fit in 32 bits, and to the last bit shifted out of the value by the shifter so it must be done in shifter, not here. 
+
+<h2>src2shift module</h2>
+src2shift module has 4 inputs and 2 outputs. Outputs are c, which is send to ALU module and src2, which is also send to ALU module. c aka carry is set here and then I am sending it to ALU, apparently, carry flag is set when shifting happens and since shifting is something that happens here I set it here and sent it out. The last bit is set by first shiftng original - 1 times, accessing this bit to be shifted and then shifting it out. As inputs it takes Rm, Rs, and Imm24. There we have 11 cases, excluding RRX, since it was moved to ALU due to the fact that instruction requires an access to the Rd, aka answ in ALU. It is not changing src2 and obviously not touching src1, it CHANGES ALU OUTPUT VALUE, and, moreover, it requires to set carry flag, so RRX has nothing to do here, it is moved out, gone, evicted, expeled, kicked out, banished, vertrieben. The 11 cases are - rotImm8, shamt5LSL, shamt5LSR, shamt5ASR, shamt5ROR, RsLSL, RsLSR, RsASR, RsROR, Imm12, BranchImm24, dirRm. They all perform corresponding shifting or rotation or nothing at all - it depends. 
+
+
+<h2>Controller module</h2>
+Controller module has 2 inputs and 10!!! outputs. The inputs are instruction which is comming from the IMEM and also allFlags, which is coming from the Flags module. It is basically cases, with cases, which also have cases, etc. The main 3 cases are for data processing instruction, memory instuction, and branching instruction, corresponding 00, 01, and 10 cases. I also used 11 case, since I heard it in class and I liked the idea and, yeah, now, I have it here as well. I use it for multiplication, since cmd has only 16 possible values, and it is easier to use op bits for that, so that's why in the first data case, I also enter with 2'b11 case. I have two always blocks. Both are triggred based on insruction coming as input. In the first always block I am checking cond bits and based on that flags, and if flags have corresponding bits set I am setting enable bit, which is used to restruct second always block in case instruction should not execuite at all. In the socond always block before starting any case I am setting default values, such as all writes should be disabled (wens) if not stated otherwise since it is something that couses the issue of writing some values at undesired locations, so if we disable them, even if we set some instruqtion and it is following the previous case, it won't be a problem since nothing "actually" gonna change, the old values will be left on the wires and it won't be affecting anything and when needed we will just modify them, also sA and sB should be set to 0 and 1 respectively, since they only change when we have branching instruction, for any oterh instructions we input with sA PC+1 from pcINC input with sB ALU data. Then in the data case I have every shift operation to happen for every other operation. src2 is defined by shifter therefore if no shift happens it should be defined in the instruction 11:0 bits. So if shift does not happen it is decided not here but in the shifter module itself. Then I have cmd states - AND, XOR, MINUS, revMINUS, PLUS, cPLUS, cMINUS, revcMINUS, TEST, TESTeq, CMP, nCMP, OR, SHIFTS, CLEAR, NOT. Memory and Branching cases are relatively easier and shorter. In the memory case I am choosing Rn data as src1 and I have two cases for src2 (more but they are cases of cases). I am alos setting corresponding U and L bits and then write or store bit, based on that I have subcase where I defined what should be enabled and which muc data is sent. For Branch case I am setting up it first and then I have two cases for Branch with link and without. That's where A and B modules behave differently. In the end I am assigning values to output and that's it! But It is pretty big module and I have comments for sections so it should be clear. 
+
+<h2>Processor module</h2>
+It is pretty short module, which simply insantiates all modules and sends input outputs at corresponding modules. I also have comments so it is clear whihc is coming from where and where it is going. It does not have any inputs as module, since I am declaring all the needed varibales inside. So it is used as a link module. 
+
+
+<h2>Simulation explained</h2>
+For the simulation, I modified IMEM, since we do not input any instructions they are hardwired in the module. 
+<p> 1. I will hardwired 9 to reg1, just for it to have some value other from x
+     adds r0, r1, #27 //put r1 + 27 to r0 and set flags //r0 = r1 + 27 = 9 + 27 = 36 //r0 = 36
+     1110 00 1 0100 1 0001 0000 0000 00011011 </p>
+
+<p> 2. subs r2, r0, r1 lsl #2 ,r2 = r0 - r1<<2, r2 = 36 - 9<<2 = 36 - 6'b100100 = 36 - 36 = 0
+     1110 00 0 0010 1 0000 0010 00010 00 0 0001 </p>
+
+<p> 3. str r2, [r1, imm12] //store r2's value to the location r1 + imm12 // r1 + imm12 = 9 + 2 = 11 // mem11 = 9
+     cond op I P U B W L Rn   Rd   imm12
+     1110 01 1 1 1 0 0 0 0001 0010 000000000010  cond op I P U B W L Rn Rd imm12 </p>
+
+<p> 4. beq label brench to label = PC+Imm24<<2 r15 = 4 + 2<<2 = 12
+     my flags are nzvc - 0101, cond - 0000 - EQ Equal Z
+     0000 10 10 000000000000000000000110 </p>
+

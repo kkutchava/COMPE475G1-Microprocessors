@@ -32,13 +32,12 @@ module src2shift(
 	typedef enum logic [3:0]{rotImm8, shamt5LSL, shamt5LSR, shamt5ASR, 
 			shamt5ROR, RsLSL, RsLSR, RsASR, RsROR, Imm12, BranchImm24, dirRm} state;
 	state myState;
-	//assign myState = opState;
 	logic [31:0] answ;
 	logic [31:0] immansw, shamt5RORansw, RsRORansw;
 //	rightRotate inst({24'b000000000000000000000000, Imm24[7:0]},{1'b0,Imm24[11:8]},immansw);
 //	rightRotate inst1(Rm,Imm24[11:7],shamt5RORansw);
 //	rightRotate inst2(Rm,Rs[4:0],RsRORansw); 
-	logic C; 
+	logic C = 0; 
 	
 	assign c = C;
 	assign src2 = answ;
@@ -58,18 +57,21 @@ module src2shift(
 					C = Rm[32 - Imm24[11:7]];
 					answ = Rm << (Imm24[11:7]); 
 				end
+				else answ = Rm;
 			end
 			shamt5LSR: begin
 				if (Imm24[11:7] != 0) begin
 					C = Rm[Imm24[11:7] - 1];
 					answ = Rm >> (Imm24[11:7]);
 				end
+				else answ = Rm;
 			end
 			shamt5ASR: begin
 				if (Imm24[11:7] != 0) begin
 					C = Rm[Imm24[11:7] - 1];
 					answ = Rm >>> (Imm24[11:7]);
 				end
+				else answ = Rm;
 			end
 			shamt5ROR: begin //rotate
 				answ = Rm;
@@ -82,18 +84,21 @@ module src2shift(
 					C = Rm[32 - Rs];
 					answ = Rm << (Rs);
 				end
+				else answ = Rm;
 			end
 			RsLSR: begin
 				if (Rs != 0) begin
 					C = Rm[Rs - 1];
 					answ = Rm >> (Rs);
 				end
+				else answ = Rm;
 			end
 			RsASR: begin
 				if (Rs != 0) begin
 					C = Rm[Rs - 1];
 					answ = Rm >>> (Rs);
 				end
+				else answ = Rm;
 			end
 			RsROR: begin //rotate
 				answ = Rm;

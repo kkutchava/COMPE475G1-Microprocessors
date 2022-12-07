@@ -137,7 +137,7 @@ module Cotroller (
 			op = opState'(instr[27:26]);
 			cmd = cmdState'(instr[24:21]);
 			case(op)
-				DATA: begin
+				DATA, 2'b11: begin
 				/////////////////////////////
 					//I think this part should be here as well because every shift operation
 					//hapens for every other operation. src2 is defined by shifter therefore if no shift happens it
@@ -206,11 +206,14 @@ module Cotroller (
 					regFile_wen0 = 1; //enable to write to the register Rd
 					
 					
-					if (cmd == 0 && instr[27:24] == 0 && instr[7:4] == 4'b1001) begin //MUL INSTRUCTION
+					//I won't use identifieer instr[7:4] = 1001, instead, I will use op = 11
+					//to define multiplication, so now every other shift type for the secondd
+					//operand could be defined for the multiplication as well
+					//instr[27:26] == 2'b11 && instr[25:24] == 2'b00 && instr[23:21] == 3'b000
+					if (instr[27:26] == 2'b11 && instr[25:24] == 2'b00 && instr[23:21] == 3'b000) begin //MUL INSTRUCTION
 						//Rd = Rn * Rm
 						sALU0 = 6; //MULT instruction
 					end
-					
 					else begin
 						case(cmd)
 							AND: begin

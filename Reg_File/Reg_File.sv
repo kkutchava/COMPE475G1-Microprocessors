@@ -19,6 +19,28 @@ module Reg_File
   
   logic [31:0] r [15:0];//16 registers with length 32 bit ==> 0, 1, ... , 15
   
+  //I am imitating emulator and there intial values of the reg-s are 0
+  //moreover it makes testing easier
+  initial begin
+	r[0] = 0;
+	r[1] = 9;
+	r[2] = 0;
+	r[3] = 0;
+	r[4] = 0;
+	r[5] = 0;
+	r[6] = 0;
+	r[7] = 0;
+	r[8] = 0;
+	r[9] = 0;
+	r[10] = 0;
+	r[11] = 0;
+	r[12] = 0;
+	r[13] = 0;
+	r[14] = 0;
+	r[15] = 0;
+  end
+ 
+  
   always @(posedge clk) begin 
     r[15] <= pc_next; //assign next value to reg 15
     if (CNTRL_write_en_addr_Rd) r[mux_addr_Rd_or_15] <= mux_ALU_result_or_DMEM_data;
